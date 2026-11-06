@@ -176,6 +176,16 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .nav .primary { order: -1; width: 100%; }
   .nav .ghost { flex: 1; }
 }
+/* Projectors are often 1280x720 or 1024x768: keep question, answers, explanation and nav on one screen. */
+@media (min-width: 761px) and (max-height: 820px) {
+  .top { padding-block: 12px 4px; }
+  .stage { padding-block: 8px 12px; }
+  #view-quiz { gap: 14px; }
+  .question { font-size: clamp(1.4rem, .8rem + 1.9vw, 2.25rem); }
+  .option { min-height: 64px; padding: 12px 18px; }
+  .answer-box { padding: 10px 14px; }
+  .hint { padding-block: 4px 10px; }
+}
 @media (hover: none) { .hint { display: none; } }
 @media (prefers-reduced-motion: reduce) {
   .enter { animation: none; }
