@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Qüestionari interactiu de 12 preguntes sobre la presentació «Automatització, personalització i el futur de la comunicació de marques».">
+<meta property="og:title" content="Qüestionari IA i màrqueting">
+<meta property="og:description" content="Qüestionari interactiu de 12 preguntes sobre la presentació «Automatització, personalització i el futur de la comunicació de marques».">
+<meta name="theme-color" content="#0a1c66">
+<title>Qüestionari IA i màrqueting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500;600&family=Unbounded:wght@600;800&display=swap">
+<style>
+/* Layout: one-screen quiz for a projector. Slim header, big question, 2x2 answer grid, nav row.
+   One dark look on purpose: the deep cobalt and 0/1 node network of the class deck, with the cyan of its infographic as the only accent. */
+:root {
+  --bg: #0a1c66;
+  --bg-deep: #050f45;
+  --bg-glow: #17399f;
+  --panel: #10287e;
+  --panel-hi: #17369d;
+  --line: #2c49ae;
+  --fg: #f2f5ff;
+  --muted: #a8b6ea;
+  --accent: #5fe3ff;
+  --accent-ink: #03143d;
+  --good: #3fe0a1;
+  --good-ink: #03281b;
+  --bad: #ff7a93;
+  --net: #8fa7ff;
+  --font-display: "Unbounded", "Arial Black", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --radius: 14px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { height: 100%; }
+body {
+  margin: 0;
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(110% 80% at 8% 0%, var(--bg-glow) 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+  background-attachment: fixed;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+#net { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: .45; }
+.wrap { position: relative; z-index: 1; width: 100%; max-width: 1200px; margin-inline: auto; min-width: 0; }
+
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.ghost {
+  background: transparent; color: var(--fg);
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 8px 16px; font-weight: 700; font-size: .95rem;
+  transition: border-color .15s;
+}
+.ghost:hover:not(:disabled) { border-color: var(--accent); }
+.ghost:disabled { opacity: .35; cursor: default; }
+.primary {
+  background: var(--accent); color: var(--accent-ink);
+  border: 0; border-radius: 999px;
+  padding: 12px 26px; font-weight: 800; font-size: 1.05rem;
+}
+.primary:hover { filter: brightness(1.08); }
+
+/* Header */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding-block: 20px 8px; }
+.brand { display: grid; gap: 2px; min-width: 0; }
+.eyebrow { font-family: var(--font-mono); font-size: .78rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0; }
+.deck-name { font-size: .95rem; color: var(--muted); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Stage */
+.stage { display: flex; flex-direction: column; justify-content: center; padding-block: 16px 24px; }
+#view-quiz { display: flex; flex-direction: column; gap: 22px; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.count { font-family: var(--font-display); font-weight: 600; font-size: .95rem; letter-spacing: .02em; }
+.slide-tag { font-family: var(--font-mono); font-size: .8rem; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+.progress { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.progress li { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+.progress li.done { background: var(--muted); }
+.progress li.extra { flex: .7; background: transparent; outline: 1px dashed var(--muted); outline-offset: -1px; }
+.progress li.now { background: var(--accent); outline: 0; }
+.question {
+  margin: 0; max-width: 34ch;
+  font-family: var(--font-body); font-weight: 800;
+  font-size: clamp(1.45rem, .9rem + 2.3vw, 2.75rem);
+  line-height: 1.15; letter-spacing: -.01em; text-wrap: balance;
+}
+
+.options { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.options[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.option {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px;
+  min-height: 84px; padding: 16px 20px; text-align: left;
+  background: var(--panel); color: var(--fg);
+  border: 2px solid var(--line); border-radius: var(--radius);
+  font-size: clamp(1.02rem, .9rem + .5vw, 1.3rem); font-weight: 600; line-height: 1.3;
+  transition: border-color .15s, background-color .15s, opacity .15s;
+}
+.option:hover:not([aria-disabled="true"]) { border-color: var(--accent); background: var(--panel-hi); }
+.option[aria-disabled="true"] { cursor: default; }
+.letter {
+  display: grid; place-items: center; width: 2.3em; height: 2.3em;
+  border: 2px solid var(--accent); border-radius: 10px; color: var(--accent);
+  font-family: var(--font-display); font-weight: 800; font-size: .9em;
+}
+.mark { font-family: var(--font-mono); font-size: .8rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.option.is-picked { border-color: var(--accent); background: var(--panel-hi); }
+.option.is-picked .letter { background: var(--accent); color: var(--accent-ink); }
+.option.is-correct { border-color: var(--good); background: color-mix(in srgb, var(--good) 16%, var(--panel)); }
+.option.is-correct .letter { background: var(--good); border-color: var(--good); color: var(--good-ink); }
+.option.is-correct .mark::after { content: "✓ Correcta"; color: var(--good); }
+.option.is-wrong { border-color: var(--bad); }
+.option.is-wrong .letter { background: var(--bad); border-color: var(--bad); color: var(--accent-ink); }
+.option.is-wrong .mark::after { content: "✗"; color: var(--bad); font-size: 1.1rem; }
+.option.is-dim { opacity: .5; }
+
+.answer { min-height: 1px; }
+.answer-box { display: grid; gap: 4px; max-width: 72ch; padding: 14px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+.answer-box p { margin: 0; color: var(--muted); font-size: 1.05rem; }
+.answer-box .status { font-weight: 800; font-size: 1.12rem; }
+.status.good { color: var(--good); }
+.status.bad { color: var(--bad); }
+.status.info { color: var(--accent); }
+
+.nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+
+/* End */
+#view-end { display: grid; gap: 18px; justify-items: start; }
+.end-title { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 1.2rem + 3.5vw, 4rem); line-height: 1.05; text-wrap: balance; }
+.score { display: flex; flex-wrap: wrap; align-items: baseline; gap: 14px; margin: 0; }
+.score-num { font-family: var(--font-display); font-weight: 800; font-size: clamp(3.5rem, 2rem + 6vw, 7rem); line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.score-label { font-size: 1.25rem; color: var(--muted); }
+.end-note { margin: 0; max-width: 60ch; color: var(--muted); font-size: 1.05rem; }
+.end-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* Answer key */
+#view-list { display: grid; gap: 20px; }
+.list-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.list-head h1 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(1.3rem, 1rem + 1.5vw, 2rem); }
+.answer-key { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.answer-key > li { display: grid; gap: 8px; padding: 16px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); min-width: 0; }
+.k-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.k-num { font-family: var(--font-display); font-weight: 800; color: var(--accent); }
+.k-q { margin: 0; font-weight: 800; font-size: 1.12rem; }
+.k-opts { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.k-opts li { color: var(--muted); }
+.k-opts li.ok { color: var(--good); font-weight: 700; }
+.k-why { margin: 0; color: var(--fg); }
+
+/* Footer */
+.hint { padding-block: 6px 18px; margin: 0; color: var(--muted); font-size: .85rem; }
+.hint kbd { font-family: var(--font-mono); font-size: .8em; color: var(--fg); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
+
+@keyframes enter { from { opacity: .35; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.enter { animation: enter .22s ease-out; }
+
+@media (max-width: 760px) {
+  .options, .options[data-count="3"] { grid-template-columns: 1fr; }
+  .option { min-height: 64px; padding: 14px 16px; gap: 12px; }
+  .nav .primary { order: -1; width: 100%; }
+  .nav .ghost { flex: 1; }
+}
+@media (hover: none) { .hint { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .enter { animation: none; }
+  .option, .ghost { transition: none; }
+}
+</style>
+</head>
+<body>
+<canvas id="net" aria-hidden="true"></canvas>
+
+<header class="top wrap">
+  <div class="brand">
+    <p class="eyebrow">Qüestionari final</p>
+    <span class="deck-name">Automatització, personalització i el futur de la comunicació de marques</span>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="btn-list" type="button">Totes les respostes</button>
+    <button class="ghost" id="btn-full" type="button">Pantalla completa</button>
+  </div>
+</header>
+
+<main class="stage wrap">
+  <section id="view-quiz" aria-labelledby="q-text">
+    <div class="meta">
+      <span class="count" id="q-count">Pregunta 1 de 12</span>
+      <span class="slide-tag" id="q-slide">Diapositiva 3</span>
+    </div>
+    <ol class="progress" id="progress" aria-hidden="true"></ol>
+    <h1 class="question" id="q-text">Quin és el gran canvi de paradigma que porta la IA al màrqueting?</h1>
+    <div class="options" id="options" role="group" aria-labelledby="q-text"></div>
+    <div class="answer" id="answer" aria-live="polite"></div>
+    <nav class="nav" aria-label="Navegació del qüestionari">
+      <button class="ghost" id="btn-prev" type="button">← Anterior</button>
+      <button class="primary" id="btn-reveal" type="button">Mostra la resposta</button>
+      <button class="ghost" id="btn-next" type="button">Següent →</button>
+    </nav>
+  </section>
+
+  <section id="view-end" aria-labelledby="end-title" hidden>
+    <p class="eyebrow">Fi del qüestionari</p>
+    <h1 class="end-title" id="end-title">Gràcies per participar!</h1>
+    <p class="score" id="score"><span class="score-num" id="score-num">0/12</span><span class="score-label">encerts</span></p>
+    <p class="end-note" id="end-note"></p>
+    <div class="end-actions">
+      <button class="primary" id="btn-restart" type="button">Torna a començar</button>
+      <button class="ghost" id="btn-list-2" type="button">Totes les respostes</button>
+    </div>
+  </section>
+
+  <section id="view-list" aria-labelledby="list-title" hidden>
+    <div class="list-head">
+      <h1 id="list-title">Totes les preguntes i respostes</h1>
+      <button class="ghost" id="btn-back" type="button">← Torna al qüestionari</button>
+    </div>
+    <ol class="answer-key" id="answer-key"></ol>
+  </section>
+</main>
+
+<p class="hint wrap"><kbd>→</kbd> o el passador: primer mostra la resposta i després passa a la següent · <kbd>←</kbd> enrere · <kbd>A</kbd>–<kbd>D</kbd> marca una opció</p>
+
+<script>
+const LETTERS = ["A", "B", "C", "D"];
+const QUESTIONS = [
+  {
+    slide: 3,
+    q: "Quin és el gran canvi de paradigma que porta la IA al màrqueting?",
+    options: [
+      "De la publicitat digital a tornar a fer fullets i anuncis en paper",
+      "Del màrqueting massiu («un missatge per a tothom») a la hiperpersonalització en temps real",
+      "De les xarxes socials a la televisió, perquè hi ha més audiència",
+      "Dels anuncis de pagament a fer només publicitat gratuïta a les xarxes"
+    ],
+    correct: 1,
+    why: "Abans es feia un sol missatge per a tothom. Ara cada persona en rep un d'adaptat als seus gustos, i en temps real."
+  },
+  {
+    slide: 3,
+    q: "Vertader o fals: més del 75 % dels professionals del màrqueting ja fan servir eines d'IA en el seu dia a dia.",
+    options: ["Vertader", "Fals"],
+    correct: 0,
+    why: "Vertader. La IA ja forma part de la feina diària de la gran majoria del sector."
+  },
+  {
+    slide: 4,
+    q: "A la infografia de la samarreta grisa i les vambes, quin anunci aconseguia més interacció?",
+    options: [
+      "L'anunci genèric de la samarreta grisa",
+      "Tots dos tenien més o menys els mateixos resultats",
+      "L'anunci de les vambes personalitzat per IA («Recomanat per a tu»)",
+      "Cap dels dos no tenia cap interacció"
+    ],
+    correct: 2,
+    why: "L'anunci genèric tenia 22 m'agrada i 3 comentaris. El personalitzat, 10,5 mil visualitzacions i 1,2 mil interaccions."
+  },
+  {
+    slide: 5,
+    q: "Quines eines es van posar d'exemple per crear imatges i vídeos sintètics?",
+    options: ["ChatGPT i Jasper", "Meta Ads i TikTok Ads", "Spotify i Netflix", "Midjourney i Runway"],
+    correct: 3,
+    why: "Midjourney i Runway permeten crear anuncis sense sessions de fotos cares. ChatGPT i Jasper eren l'exemple per als textos."
+  },
+  {
+    slide: 6,
+    q: "Qui és l'Aitana López?",
+    options: [
+      "Una influencer 100 % virtual creada a Barcelona",
+      "Una influencer real de Barcelona que fa servir molts filtres",
+      "La directora de màrqueting de Netflix a Espanya",
+      "La cantant més escoltada del Wrapped de l'any passat"
+    ],
+    correct: 0,
+    why: "És una creació digital feta amb IA que factura milers d'euros amb patrocinis, igual que la nord-americana Lil Miquela."
+  },
+  {
+    slide: 6,
+    q: "Per a què serveixen les eines de social listening?",
+    options: [
+      "Per saber quines cançons sonen més als vídeos de les xarxes",
+      "Per analitzar milers de comentaris i detectar si l'opinió sobre la marca és bona o si hi ha una crisi",
+      "Per gravar i escoltar les trucades que fan els clients a la marca",
+      "Per publicar comentaris automàtics als perfils de la marca cada dia"
+    ],
+    correct: 1,
+    why: "«Escoltar» les xarxes vol dir analitzar què diu la gent de la marca per poder reaccionar a temps davant d'una crisi de reputació."
+  },
+  {
+    slide: 7,
+    q: "Què personalitza Netflix segons els gustos de cada usuari?",
+    options: [
+      "El preu de la subscripció de cada mes",
+      "El final de les pel·lícules i les sèries",
+      "La caràtula de les sèries i les pel·lícules",
+      "L'idioma dels subtítols i del doblatge"
+    ],
+    correct: 2,
+    why: "Si t'agrada el romanç o l'acció, et mostra imatges diferents de la mateixa pel·lícula per convèncer-te que la miris."
+  },
+  {
+    slide: 7,
+    q: "Per què el Wrapped de Spotify és un èxit de màrqueting?",
+    options: [
+      "Perquè surt en anuncis molt cars a la televisió i a la ràdio",
+      "Perquè regala uns quants mesos de Spotify Premium a tothom",
+      "Perquè només el poden veure els artistes i els famosos",
+      "Perquè els usuaris comparteixen voluntàriament el seu resum a Instagram i TikTok"
+    ],
+    correct: 3,
+    why: "Converteix l'historial de cada persona en històries personalitzades, i són els mateixos usuaris els qui fan la publicitat, gratis."
+  },
+  {
+    slide: 8,
+    q: "Quin d'aquests NO és un dels avantatges de la IA que hem vist?",
+    options: [
+      "Garantir que tot el contingut és 100 % original",
+      "Eficiència operativa",
+      "Decisions basades en dades (data-driven)",
+      "Escalabilitat"
+    ],
+    correct: 0,
+    why: "Els quatre avantatges eren eficiència operativa, decisions basades en dades, escalabilitat i optimització del pressupost. L'originalitat, de fet, és un dels riscos."
+  },
+  {
+    slide: 9,
+    q: "Què és l'«AI slop»?",
+    options: [
+      "Un virus informàtic que es fa passar per una IA",
+      "Una xarxa social nova on només publiquen bots",
+      "La saturació de contingut genèric fet amb IA, tot igual i sense originalitat",
+      "Un programa que detecta deepfakes en els anuncis"
+    ],
+    correct: 2,
+    why: "Quan tothom fa servir les mateixes eines, les xarxes s'omplen de publicacions idèntiques i sense ànima humana."
+  },
+  {
+    slide: 9,
+    q: "Què vol dir que una IA «al·lucina»?",
+    options: [
+      "Que genera imatges psicodèliques i molt acolorides",
+      "Que s'inventa informació i la presenta com si fos certa",
+      "Que es queda sense connexió a internet i deixa de funcionar",
+      "Que ensenya el mateix anunci massa vegades seguides"
+    ],
+    correct: 1,
+    why: "Un bot que respon amb informació falsa o inadequada pot fer malbé la imatge de la marca i la confiança dels clients."
+  },
+  {
+    slide: 10,
+    q: "Segons el model híbrid, què continua sent cosa de les persones?",
+    options: [
+      "Programar publicacions i fer informes",
+      "Analitzar milers de dades de cop",
+      "Respondre tots els missatges del xat",
+      "L'estratègia, l'ètica i l'empatia"
+    ],
+    correct: 3,
+    why: "La IA fa de copilot (automatització i anàlisi), però el criteri humà continua sent imprescindible."
+  },
+  {
+    slide: 10,
+    q: "I vosaltres? Compraríeu un producte si us el recomanés un influencer 100 % virtual creat per IA?",
+    options: ["Sí", "No", "Depèn del producte"],
+    correct: null,
+    why: "Aquí no hi ha resposta correcta. Feu-ho a mà alçada i comenteu-ho: és la pregunta amb què hem tancat la presentació."
+  }
+];
+const GRADED = QUESTIONS.filter((item) => item.correct !== null).length;
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const state = { i: 0, view: "quiz", back: "quiz", picks: {}, shown: {} };
+
+const $ = (id) => document.getElementById(id);
+const els = {
+  quiz: $("view-quiz"), end: $("view-end"), list: $("view-list"),
+  count: $("q-count"), slide: $("q-slide"), text: $("q-text"), options: $("options"),
+  answer: $("answer"), progress: $("progress"),
+  prev: $("btn-prev"), next: $("btn-next"), reveal: $("btn-reveal"),
+  listBtn: $("btn-list"), listBtn2: $("btn-list-2"), backBtn: $("btn-back"),
+  restart: $("btn-restart"), full: $("btn-full"),
+  score: $("score"), scoreNum: $("score-num"), endNote: $("end-note"), key: $("answer-key")
+};
+
+const isGraded = (item) => item.correct !== null;
+const pickOf = (k) => (state.picks[k] === undefined ? undefined : Number(state.picks[k]));
+
+function renderProgress() {
+  els.progress.replaceChildren(...QUESTIONS.map((item, k) => {
+    const li = document.createElement("li");
+    if (!isGraded(item)) li.classList.add("extra");
+    if (k === state.i) li.classList.add("now");
+    else if (k < state.i) li.classList.add("done");
+    return li;
+  }));
+}
+
+function renderQuiz() {
+  const item = QUESTIONS[state.i];
+  const graded = isGraded(item);
+  const shown = graded ? Boolean(state.shown[state.i]) : true;
+  const pick = pickOf(state.i);
+
+  els.count.textContent = graded ? `Pregunta ${state.i + 1} de ${GRADED}` : "Pregunta final · Opinió";
+  els.slide.textContent = `Diapositiva ${item.slide}`;
+  els.text.textContent = item.q;
+  els.options.dataset.count = String(item.options.length);
+  els.options.replaceChildren(...item.options.map((label, k) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.id = `opcio-${k}`;
+    b.className = "option";
+    const letter = document.createElement("span");
+    letter.className = "letter";
+    letter.textContent = LETTERS[k];
+    const text = document.createElement("span");
+    text.textContent = label;
+    const mark = document.createElement("span");
+    mark.className = "mark";
+    mark.setAttribute("aria-hidden", "true");
+    b.append(letter, text, mark);
+    const picked = pick === k;
+    b.setAttribute("aria-pressed", String(picked));
+    if (picked) b.classList.add("is-picked");
+    if (graded && shown) {
+      b.setAttribute("aria-disabled", "true");
+      if (k === item.correct) b.classList.add("is-correct");
+      else if (picked) b.classList.add("is-wrong");
+      else b.classList.add("is-dim");
+    }
+    b.addEventListener("click", () => choose(k));
+    return b;
+  }));
+
+  els.answer.replaceChildren();
+  if (shown) {
+    const box = document.createElement("div");
+    box.className = "answer-box";
+    const status = document.createElement("p");
+    status.className = "status";
+    if (!graded) {
+      status.classList.add("info");
+      status.textContent = "Pregunta d'opinió: no hi ha resposta correcta.";
+    } else if (pick === undefined) {
+      status.classList.add("info");
+      status.textContent = `La resposta correcta és la ${LETTERS[item.correct]}.`;
+    } else if (pick === item.correct) {
+      status.classList.add("good");
+      status.textContent = "Correcte!";
+    } else {
+      status.classList.add("bad");
+      status.textContent = `No és aquesta. La correcta és la ${LETTERS[item.correct]}.`;
+    }
+    const why = document.createElement("p");
+    why.textContent = item.why;
+    box.append(status, why);
+    els.answer.append(box);
+  }
+
+  els.reveal.hidden = !graded;
+  els.reveal.textContent = shown && graded ? "Amaga la resposta" : "Mostra la resposta";
+  els.prev.disabled = state.i === 0;
+  els.next.textContent = state.i === QUESTIONS.length - 1 ? "Resultats →" : "Següent →";
+  renderProgress();
+}
+
+function renderEnd() {
+  let answered = 0;
+  let right = 0;
+  QUESTIONS.forEach((item, k) => {
+    if (!isGraded(item) || pickOf(k) === undefined) return;
+    answered += 1;
+    if (pickOf(k) === item.correct) right += 1;
+  });
+  els.scoreNum.textContent = `${right}/${GRADED}`;
+  els.score.hidden = answered === 0;
+  if (answered === 0) {
+    els.endNote.textContent = "Si marqueu una opció abans de mostrar cada resposta, aquí sortirà el recompte d'encerts.";
+  } else if (answered < GRADED) {
+    els.endNote.textContent = `Heu marcat resposta en ${answered} de les ${GRADED} preguntes.`;
+  } else {
+    els.endNote.textContent = "Heu respost totes les preguntes.";
+  }
+}
+
+function renderList() {
+  if (els.key.childElementCount) return;
+  els.key.replaceChildren(...QUESTIONS.map((item, k) => {
+    const li = document.createElement("li");
+    const head = document.createElement("div");
+    head.className = "k-head";
+    const num = document.createElement("span");
+    num.className = "k-num";
+    num.textContent = isGraded(item) ? String(k + 1) : "Opinió";
+    const tag = document.createElement("span");
+    tag.className = "slide-tag";
+    tag.textContent = `Diapositiva ${item.slide}`;
+    head.append(num, tag);
+    const q = document.createElement("p");
+    q.className = "k-q";
+    q.textContent = item.q;
+    const opts = document.createElement("ul");
+    opts.className = "k-opts";
+    item.options.forEach((label, j) => {
+      const o = document.createElement("li");
+      const ok = j === item.correct;
+      o.textContent = `${LETTERS[j]}. ${label}${ok ? "  ✓" : ""}`;
+      if (ok) o.className = "ok";
+      opts.append(o);
+    });
+    const why = document.createElement("p");
+    why.className = "k-why";
+    why.textContent = item.why;
+    li.append(head, q, opts, why);
+    return li;
+  }));
+}
+
+function render(animate) {
+  els.quiz.hidden = state.view !== "quiz";
+  els.end.hidden = state.view !== "end";
+  els.list.hidden = state.view !== "list";
+  els.listBtn.textContent = state.view === "list" ? "Torna al qüestionari" : "Totes les respostes";
+  if (state.view === "quiz") renderQuiz();
+  if (state.view === "end") renderEnd();
+  if (state.view === "list") renderList();
+  if (animate && !reduceMotion) {
+    const el = state.view === "end" ? els.end : els.quiz;
+    el.classList.remove("enter");
+    void el.offsetWidth;
+    el.classList.add("enter");
+  }
+}
+
+function choose(k) {
+  const item = QUESTIONS[state.i];
+  if (isGraded(item) && state.shown[state.i]) return;
+  if (pickOf(state.i) === k) delete state.picks[state.i];
+  else state.picks[state.i] = k;
+  render(false);
+}
+
+function toggleReveal() {
+  if (!isGraded(QUESTIONS[state.i])) return;
+  state.shown[state.i] = !state.shown[state.i];
+  render(false);
+}
+
+function go(delta) {
+  if (state.view === "end" && delta < 0) {
+    state.view = "quiz";
+    render(true);
+    return;
+  }
+  if (state.view !== "quiz") return;
+  const n = state.i + delta;
+  if (n < 0) return;
+  if (n >= QUESTIONS.length) {
+    state.view = "end";
+    render(true);
+    return;
+  }
+  state.i = n;
+  render(true);
+}
+
+function advance() {
+  if (state.view !== "quiz") return;
+  const item = QUESTIONS[state.i];
+  if (isGraded(item) && !state.shown[state.i]) toggleReveal();
+  else go(1);
+}
+
+function toggleList() {
+  if (state.view === "list") {
+    state.view = state.back || "quiz";
+  } else {
+    state.back = state.view;
+    state.view = "list";
+  }
+  render(false);
+  window.scrollTo(0, 0);
+}
+
+els.prev.addEventListener("click", () => go(-1));
+els.next.addEventListener("click", () => go(1));
+els.reveal.addEventListener("click", toggleReveal);
+els.listBtn.addEventListener("click", toggleList);
+els.listBtn2.addEventListener("click", toggleList);
+els.backBtn.addEventListener("click", toggleList);
+els.restart.addEventListener("click", () => {
+  state.i = 0;
+  state.view = "quiz";
+  state.picks = {};
+  state.shown = {};
+  render(true);
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if (state.view === "list") {
+    if (e.key === "Escape") toggleList();
+    return;
+  }
+  const onButton = e.target instanceof HTMLElement && e.target.tagName === "BUTTON";
+  if (e.key === "ArrowRight" || e.key === "PageDown") {
+    e.preventDefault();
+    advance();
+  } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+    e.preventDefault();
+    go(-1);
+  } else if (e.key === " " && !onButton) {
+    e.preventDefault();
+    advance();
+  } else if (state.view === "quiz" && e.key.length === 1) {
+    const key = e.key.toLowerCase();
+    const idx = "abcd".includes(key) ? "abcd".indexOf(key) : "1234".indexOf(key);
+    if (idx >= 0 && idx < QUESTIONS[state.i].options.length) {
+      e.preventDefault();
+      choose(idx);
+    }
+  }
+});
+
+/* Fullscreen is optional: hide the button where the frame does not allow it. */
+const canFull = Boolean(document.fullscreenEnabled && document.documentElement.requestFullscreen);
+els.full.hidden = !canFull;
+els.full.addEventListener("click", async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch (err) {
+    els.full.hidden = true;
+  }
+});
+document.addEventListener("fullscreenchange", () => {
+  els.full.textContent = document.fullscreenElement ? "Surt de pantalla completa" : "Pantalla completa";
+});
+
+/* Static 0/1 node network, echoing the deck's background. */
+function drawNet() {
+  const c = $("net");
+  const ctx = c.getContext("2d");
+  if (!ctx) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  c.width = Math.round(w * dpr);
+  c.height = Math.round(h * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  const color = getComputedStyle(document.documentElement).getPropertyValue("--net").trim() || "#8fa7ff";
+  let seed = 20251106;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const count = Math.max(24, Math.round((w * h) / 24000));
+  const pts = [];
+  for (let k = 0; k < count; k++) {
+    const r = rnd();
+    pts.push({ x: w * (0.3 + 0.7 * rnd()), y: h * rnd(), glyph: r < 0.3 ? "0" : r < 0.6 ? "1" : "" });
+  }
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 1;
+  const maxD = Math.max(110, Math.min(w, h) * 0.17);
+  for (let a = 0; a < pts.length; a++) {
+    for (let b = a + 1; b < pts.length; b++) {
+      const d = Math.hypot(pts[a].x - pts[b].x, pts[a].y - pts[b].y);
+      if (d >= maxD) continue;
+      ctx.globalAlpha = 0.4 * (1 - d / maxD);
+      ctx.beginPath();
+      ctx.moveTo(pts[a].x, pts[a].y);
+      ctx.lineTo(pts[b].x, pts[b].y);
+      ctx.stroke();
+    }
+  }
+  ctx.font = "600 11px 'IBM Plex Mono', ui-monospace, monospace";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.globalAlpha = 0.6;
+  for (const p of pts) {
+    if (p.glyph) {
+      ctx.fillText(p.glyph, p.x, p.y);
+    } else {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+let netTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(netTimer);
+  netTimer = setTimeout(drawNet, 150);
+});
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawNet);
+
+function start(data) {
+  const saved = data && data.state;
+  if (saved && typeof saved === "object") {
+    if (Number.isInteger(saved.i) && saved.i >= 0 && saved.i < QUESTIONS.length) state.i = saved.i;
+    if (["quiz", "end", "list"].includes(saved.view)) state.view = saved.view;
+    if (["quiz", "end"].includes(saved.back)) state.back = saved.back;
+    if (saved.picks && typeof saved.picks === "object") state.picks = saved.picks;
+    if (saved.shown && typeof saved.shown === "object") state.shown = saved.shown;
+  }
+  drawNet();
+  render(false);
+}
+start({});
+</script>
+</body>
+</html>
